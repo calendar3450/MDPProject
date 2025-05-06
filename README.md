@@ -40,7 +40,7 @@ Goals:
    y_t = y_0 + a(Compound score average)
    
 4. Back Test: 2020/01/02
-   - 누적수익: $199.9
+   - Total reward: $199.9
 
 ## Performance Metric:
   - Total Dollar.
