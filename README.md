@@ -12,11 +12,18 @@ Use an MDP with integrated news sentiment to build a trading strategy so that a 
   - beautifulsoup4 (web scraping)  
   - stable-baselines3 (DQN implementation)  
   - matplotlib, seaborn (evaluation visualization)
+  - DQN
 
 ## Data Sources
 - Price data: Yahoo Financ
 - News headlines yfinance.Ticker("Company").news
 - Sentiment model: NLTK VADER (https://www.nltk.org/_modules/nltk/sentiment/vader.html)
+
+## Step
+ 1. Identify candidate pairs. For each pair under consideration, compute their cointegration coefficient (using the Yahoo API stock price notebook).
+ 2. Check if the pair is suitable for trading by ensuring the cointegration coefficient ≤ 0.15.
+ 3. In the MDPModel.ipynb notebook, aggregate the news scores and price data and feed them into the model.
+ 4. Save the model so it can be applied to other stocks.
 
 ## Goal
 Why pair trading?
@@ -34,7 +41,7 @@ Goals:
 1. Environment implementation: `PairTradingEnv`  
    - **State**: 8‑dimensional vector (spread, MA, STD, Z-score, price, diff_score, MCD_closed_price, YUM_closed_price)  
    - **Action**: {0: Hold, 1: Long, 2: Short}  
-   - **Reward**: P&L after transaction costs, adjusted by sentiment‑weighted γ
+   - **Reward**: P&L after transaction costs, adjusted by sentiment‑weighted  R_t = (PnL_t - c) * γ_t; γ_t = γ_0 + a *sent_t
   
 2. Sentiment integration::
    y_t = y_0 + a(Compound score average)
@@ -60,12 +67,13 @@ Automate an MDP that takes long, short, or hold actions on the spread of two sto
 State: s_t ∈ ℝ^8
 Action: {0,1,2}
 Transition:  Next state determined by new prices and market stochasticity
-Observation: State vector provided at each step
+Observation: State vector provided at each step (O(s_t)=s_t)
 
 ## 4.Solution Method
 
  Using Data:
  Policy: a_t = argmax_a Q(s_t,a)
+ Reward: R_t = (PnL_t - c) * γ_t; γ_t = γ_0 + a *sent_t
  Loss: MSE between predicted Q‑value and target Q‑value
 
 
