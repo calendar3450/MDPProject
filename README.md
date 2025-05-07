@@ -90,3 +90,21 @@ Observation: State vector provided at each step (O(s_t)=s_t)
   diff_score =  np.zeros_like(spread)
   MCD =raw["MCD"]
   YUM = raw["YUM"]
+
+## 6. Resources:
+1. https://www.insightbig.com/post/developing-a-profitable-pairs-trading-strategy-with-python
+2. https://databento.com/blog/build-a-pairs-trading-strategy-in-python
+3. https://medium.databento.com/build-a-pairs-trading-strategy-in-python-a-step-by-step-guide-dcee006e1a50?gi=5738dae53da6
+4. https://medium.com/@ngao7/markov-decision-process-value-iteration-2d161d50a6ff
+5. https://wire.insiderfinance.io/markov-decision-processes-mdp-ai-meets-finance-algorithms-series-7f34de5680d5
+6. https://python.plainenglish.io/understanding-markov-decision-processes-17e852cd9981
+7. https://www.datacamp.com/tutorial/markov-chains-python-tutorial
+8. https://blog.naver.com/chunjein/100203065865
+9. https://www.youtube.com/watch?v=YDMSqal-RZ4
+10. https://domino.ai/blog/deep-reinforcement-learning
+11. https://www.nltk.org/howto/sentiment.html
+12. https://alexanderozkan.com/Sentiment-Analysis-as-a-Trading-Indicator/
+13. https://newsdata.io/blog/access-yahoo-finance-news-api/
+14. https://developer.yahoo.com/api/
+15. https://ranaroussi.github.io/yfinance/
+
