@@ -64,17 +64,17 @@ Automate an MDP that takes long, short, or hold actions on the spread of two sto
  6. Learning U.S. Financial Engineering at 44 (https://wikidocs.net/book/4978)
 
 ## 3.State, Action, Transition, and Observation
-State: s_t ∈ ℝ^8
-Action: {0,1,2}
-Transition:  Next state determined by new prices and market stochasticity
-Observation: State vector provided at each step (O(s_t)=s_t)
+- State: s_t ∈ ℝ^8
+- Action: {0,1,2}
+- Transition:  Next state determined by new prices and market stochasticity
+- Observation: State vector provided at each step (O(s_t)=s_t)
 
 ## 4.Solution Method
 
  Using Data:
- Policy: a_t = argmax_a Q(s_t,a)
- Reward: R_t = (PnL_t - c) * γ_t; γ_t = γ_0 + a *sent_t
- Loss: MSE between predicted Q‑value and target Q‑value
+ - Policy: a_t = argmax_a Q(s_t,a)
+ - Reward: R_t = (PnL_t - c) * γ_t; γ_t = γ_0 + a *sent_t
+ - Loss: MSE between predicted Q‑value and target Q‑value
 
 
 ## 5. Implementation Details
