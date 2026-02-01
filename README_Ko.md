@@ -21,22 +21,22 @@ MDP와 뉴스 감성 통합 기능을 이용하여 트레이딩 전략을 구�
 ## 시스템 아키텍처(구조도)
 ```mermaid
 flowchart LR
-    subgraph 데이터 수집
-        A[Yahoo Finance 가격 데이터] --> B[가격 전처리<br/>스프레드/MA/STD/Z-score]
-        C[뉴스 헤드라인] --> D[VADER 감성 분석<br/>Compound 점수]
+    subgraph "데이터 수집"
+        A[Yahoo Finance 가격 데이터] --> B["가격 전처리<br/>(스프레드/MA/STD/Z-score)"]
+        C[뉴스 헤드라인] --> D["VADER 감성 분석<br/>(Compound 점수)"]
     end
 
-    subgraph 모델링
-        B --> E[상태 벡터 s_t<br/>8차원]
-        D --> F[감성 기반 할인계수 γ_t]
-        E --> G[PairTradingEnv (MDP)]
+    subgraph "모델링"
+        B --> E["상태 벡터 s_t<br/>(8차원)"]
+        D --> F["감성 기반 할인계수 γ_t"]
+        E --> G["PairTradingEnv (MDP)"]
         F --> G
-        G --> H[DQN (stable-baselines3)]
+        G --> H["DQN (stable-baselines3)"]
     end
 
-    subgraph 평가
-        H --> I[백테스트/성과 측정]
-        I --> J[누적수익/리스크 조정 수익]
+    subgraph "평가"
+        H --> I["백테스트/성과 측정"]
+        I --> J["누적수익/리스크 조정 수익"]
     end
 ```
 
