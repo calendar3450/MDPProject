@@ -1,97 +1,123 @@
-# Pair Trading Reinforcement Learning MDP Environment
-Use an MDP with integrated news sentiment to build a trading strategy so that a third party can reproduce all results.
+# 페어 트레이딩 강화학습 MDP 환경
+MDP와 뉴스 감성 통합 기능을 이용하여 트레이딩 전략을 구형하여 제 3자가 모든 결과를 재현할 수 있도록 합니다.
 
-## Software Requirements
+## 소프트웨어 및 하드웨어 요구사항
 
--Software-
- - Python 3.8 +  
+-소프트웨어-
+ - Python 3.8 이상  
   - gymnasium ≥ 0.28  
   - numpy, pandas  
   - yfinance
-  - nltk (VADER sentiment analysis)  
-  - beautifulsoup4 (web scraping)  
-  - stable-baselines3 (DQN implementation)  
-  - matplotlib, seaborn (evaluation visualization)
-  - DQN
+  - nltk (VADER 감성 분석)  
+  - beautifulsoup4 (웹 스크래핑)  
+  - stable-baselines3 (DQN 구현)  
+  - matplotlib, seaborn (평가 시각화)
 
-## Data Sources
-- Price data: Yahoo Financ
-- News headlines yfinance.Ticker("Company").news
-- Sentiment model: NLTK VADER (https://www.nltk.org/_modules/nltk/sentiment/vader.html)
+## 데이터 소스
+- 가격 데이터: Yahoo Financ
+- 뉴스 헤드라인 yfinance.Ticker("Company").news
+- 감성 모델: NLTK VADER (https://www.nltk.org/_modules/nltk/sentiment/vader.html)
 
-## Step
- 1. Identify candidate pairs. For each pair under consideration, compute their cointegration coefficient (using the Yahoo API stock price notebook).
- 2. Check if the pair is suitable for trading by ensuring the cointegration coefficient ≤ 0.15.
- 3. In the MDPModel.ipynb notebook, aggregate the news scores and price data and feed them into the model.
- 4. Save the model so it can be applied to other stocks.
+## 시스템 아키텍처(구조도)
+```mermaid
+flowchart LR
+    subgraph "데이터 수집"
+        A[Yahoo Finance 가격 데이터] --> B["가격 전처리<br/>(스프레드/MA/STD/Z-score)"]
+        C[뉴스 헤드라인] --> D["VADER 감성 분석<br/>(Compound 점수)"]
+    end
 
-## Goal
-Why pair trading?
- A market‑neutral strategy using mean reversion of the spread between two correlated assets. (https://arxiv.org/pdf/2407.16103)
+    subgraph "모델링"
+        B --> E["상태 벡터 s_t<br/>(8차원)"]
+        D --> F["감성 기반 할인계수 γ_t"]
+        E --> G["PairTradingEnv (MDP)"]
+        F --> G
+        G --> H["DQN (stable-baselines3)"]
+    end
+
+    subgraph "평가"
+        H --> I["백테스트/성과 측정"]
+        I --> J["누적수익/리스크 조정 수익"]
+    end
+```
+
+## 목표
+왜 페어 트레이딩인가?
+ 두 상관 자산 간 스프레드의 평균회귀를 이용한 시장 중립 전략 (https://arxiv.org/pdf/2407.16103)
  
-Why RL + news sentiment?
- Traditional threshold rules don’t reflect real‑time news changes. By incorporating news sentiment into the discount factor or reward, the strategy can adapt to changing market conditions.
+왜 강화학습 + 뉴스 감성인가?
+ 전통적 임계치 규칙은 실간 뉴스 변동을 반영하지 않음. 뉴스 감성을 할인 인자나 보상에 반영하여 시장 환경 변화에 적응하도록 함.
 
-Goals:
- 1.  Implement the MDP environment
- 2.  Integrate dynamic discount factors based on news sentiment
- 3.  Train on data to maximize risk‑adjusted returns
+목표:
+ 1.  MDP 환경 구현
+ 2.  뉴스 감성 기반 동적 할인 인자 통합
+ 3.  데이터들을 이용해 학습시켜 리스크 조정 수익 최대화
   
-## Key Achievements
-1. Environment implementation: `PairTradingEnv`  
-   - **State**: 8‑dimensional vector (spread, MA, STD, Z-score, price, diff_score, MCD_closed_price, YUM_closed_price)  
-   - **Action**: {0: Hold, 1: Long, 2: Short}  
-   - **Reward**: P&L after transaction costs, adjusted by sentiment‑weighted  R_t = (PnL_t - c) * γ_t; γ_t = γ_0 + a *sent_t
+## 주요 성과
+1. 환경 구현: `PairTradingEnv`  
+   - **상태**: 8차원 벡터 (spread, MA, STD, Z-score, price, diff_score, MCD_closed_price, YUM_closed_price)  
+   - **행동**: {0: 보유, 1: 롱, 2: 숏}  
+   - **보상**: 거래 비용 차감 후 P&L, 감성 조정 γ 적용
   
-2. Sentiment integration::
-   y_t = y_0 + a(Compound score average)
+2. 감성 통합:
+   y_t = t_0 + a(=0.15)
    
-4. Back Test: 2020/01/02
-   - Total reward: $199.9
+4. 백 테스트: 2020/01/02~ 2024/01/02
+   - 누적수익: $199.9
 
-## Performance Metric:
-  - Total Dollar.
+## 📝 문제 정의 (Problem Definition)
 
-## Problem Definition
-Automate an MDP that takes long, short, or hold actions on the spread of two stocks at each time step to control risk and maximize returns, adjusting dynamically to live news sentiment.
+본 프로젝트의 목표는 매 시점 두 주식의 스프레드(Spread)에 대해 매수(Long), 매도(Short), 관망(Hold) 행동을 수행하는 **MDP 기반 자동화 시스템**을 구축하는 것입니다. 실시간 뉴스 감성 분석(Live News Sentiment)을 반영하여 동적으로 보상을 조절함으로써, 리스크를 관리하고 수익을 극대화합니다.
 
-## Related Work and References
- 1. Optimizing the Pairs-Trading Strategy Using Deep Reinforcement Learning with Trading and Stop-Loss Boundaries (https://onlinelibrary.wiley.com/doi/10.1155/2019/3582516)
- 2. Pairs Trading with Robust Kalman Filter and Hidden Markov Model (https://medium.com/@kaichong.wang/statistical-arbitrage-1-pairs-trading-with-robust-kalman-filter-and-hidden-markov-model-62d0a1a0e4ae)
- 3. Deep Reinforcement Learning Pairs Trading  (https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=2447&context=gradreports)
- 4. Pair trading Kyobo life
- 5. What hedge funds use? A review of pair‑trading strategies (https://insight.stockplus.com/articles/5336)
- 6. Learning U.S. Financial Engineering at 44 (https://wikidocs.net/book/4978)
+---
 
-## 3.State, Action, Transition, and Observation
-- State: s_t ∈ ℝ^8
-- Action: {0,1,2}
-- Transition:  Next state determined by new prices and market stochasticity
-- Observation: State vector provided at each step (O(s_t)=s_t)
+## 🔍 MDP 모델링: 상태, 행동, 전이 및 관측
 
-## 4.Solution Method
+강화학습 모델이 의사결정을 내리기 위한 핵심 요소인 $S, A, T, O$를 다음과 같이 정의합니다.
 
- Using Data:
- - Policy: a_t = argmax_a Q(s_t,a)
- - Reward: R_t = (PnL_t - c) * γ_t; γ_t = γ_0 + a *sent_t
- - Loss: MSE between predicted Q‑value and target Q‑value
+- **상태 (State, $s_t$)**: $s_t \in \mathbb{R}^8$
+  - 스프레드, 이동평균, 표준편차, Z-score, 현재가, 감성 점수 차이, 종목별 종가 등 8차원 벡터로 구성됩니다.
+- **행동 (Action, $a_t$)**: $\{0, 1, 2\}$
+  - `0: Hold(관망)`, `1: Long(매수)`, `2: Short(매도)`
+- **전이 (Transition)**: 
+  - 새로운 시장 가격 유입 및 시장의 확률적 변동(Stochasticity)에 의해 다음 상태($s_{t+1}$)가 결정됩니다.
+- **관측 (Observation)**:
+  - 매 스텝마다 모델에 상태 벡터가 직접 제공됩니다 ($O(s_t) = s_t$).
 
+---
 
-## 5. Implementation Details
- 1. Environment (`PairTradingEnv`)
-    - action_space = Discrete(3)
-    - `reset()`, `step(a)`, `render()` Implement
-      
- 2. Data Preprocessing:
-    - python
-  spread_MA = spread.rolling(win).mean()
-  spread_STD = spread.rolling(win).std(ddof=0)
-  Z_score = (spread - spread_MA) / spread_STD
-  diff_score =  np.zeros_like(spread)
-  MCD =raw["MCD"]
-  YUM = raw["YUM"]
+## 💡 해결 방법론 (Solution Method)
 
-## 6. Resources:
+데이터 기반의 최적 정책을 찾기 위해 다음 수식을 사용합니다.
+
+- **정책 (Policy)**: $a_t = \arg\max_a Q(s_t, a)$ (Q-값이 최대인 행동 선택)
+- **보상 (Reward)**: $R_t = (PnL_t - c) \times \gamma_t$
+  - 여기서 $\gamma_t = \gamma_0 + \alpha \times \text{sent}_t$ (뉴스 감성에 따른 동적 가중치)
+- **손실 함수 (Loss)**: 예측 Q-값과 타겟 Q-값 사이의 **MSE(Mean Squared Error)** 최소화
+
+---
+
+## 🛠 구현 상세 (Implementation Details)
+
+### 1. 환경 구성 (`PairTradingEnv`)
+- **Gymnasium** 라이브러리를 활용하여 표준 RL 환경을 구현했습니다.
+- `action_space`: `Discrete(3)`
+- 주요 메서드: `reset()`, `step(a)`, `render()` 구현 완료
+
+### 2. 데이터 전처리 (Data Preprocessing)
+Python의 Pandas와 Numpy를 활용하여 금융 지표를 생성합니다.
+```python
+# 스프레드 지표 계산 예시
+spread_MA = spread.rolling(window=win).mean()
+spread_STD = spread.rolling(window=win).std(ddof=0)
+Z_score = (spread - spread_MA) / spread_STD
+
+# 뉴스 감성 차이 및 종목 데이터 결합
+diff_score = np.zeros_like(spread)
+MCD_price = raw["MCD"]
+YUM_price = raw["YUM"]
+```
+
+## Resources:
 1. https://www.insightbig.com/post/developing-a-profitable-pairs-trading-strategy-with-python
 2. https://databento.com/blog/build-a-pairs-trading-strategy-in-python
 3. https://medium.databento.com/build-a-pairs-trading-strategy-in-python-a-step-by-step-guide-dcee006e1a50?gi=5738dae53da6
@@ -107,4 +133,3 @@ Automate an MDP that takes long, short, or hold actions on the spread of two sto
 13. https://newsdata.io/blog/access-yahoo-finance-news-api/
 14. https://developer.yahoo.com/api/
 15. https://ranaroussi.github.io/yfinance/
-
